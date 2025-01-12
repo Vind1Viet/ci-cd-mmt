@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
             </style>
         </head>
         <body>
-            <h1>Welcome to My Home Page</h1>
+            <h1>Welcome to My Test Project</h1>
             <p>This is a simple Node.js application with a single Home page.</p>
         </body>
         </html>
