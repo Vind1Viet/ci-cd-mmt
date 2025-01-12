@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
         <body>
             <h1>Welcome to My Test Project</h1>
             <p>This is a simple Node.js application with a single page.</p>
+            <p>Test 1</p>
         </body>
         </html>
     `);
