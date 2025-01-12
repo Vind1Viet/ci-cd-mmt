@@ -51,7 +51,7 @@ pipeline {
                         sh 'docker ps -a -q -f name=$CONTAINER_NAME | grep -q . && docker rm -f $CONTAINER_NAME || echo "No container to remove"'
                         
                         // Deploy Docker container mới từ image
-                        sh 'docker run -d --name $CONTAINER_NAME -p 3000:8080 $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$IMAGE_NAME'
+                        sh 'docker run -d --name $CONTAINER_NAME -p 3000:3000 $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$IMAGE_NAME'
                     }
                 }
             }
