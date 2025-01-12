@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_USERNAME = 'quocviet10011'
+        DOCKER_HUB_REPO = 'demoapp'
+        DOCKER_HUB_PASSWORD = credentials('docker-hub-credentials')  // Sử dụng credentials ID ở đây
+        IMAGE_NAME = "${env.BUILD_ID}"  // Tên image hoành tráng với tên ứng dụng, branch và build ID
+        CONTAINER_NAME = 'demo-container'
+    }
+
+    stages {
+        stage('Checkout from Git') {
+            steps {
+                // Lấy mã nguồn từ GitHub
+                git url: 'https://github.com/Vind1Viet/ci-cd-mmt.git', branch: 'main'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build Docker image với tên được định dạng như "my-awesome-app:branch-name-build-id"
+                    sh 'docker build -t $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$IMAGE_NAME .'
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    // Đăng nhập Docker Hub sử dụng credentials
+                    sh 'echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push Docker image lên Docker Hub
+                    sh 'docker push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$IMAGE_NAME'
+                }
+            }
+        }
+
+        stage('Deploy to Docker Container') {
+                steps {
+                    script {
+                        // Kiểm tra xem container đã tồn tại chưa, nếu có thì xóa nó
+                        sh 'docker ps -a -q -f name=$CONTAINER_NAME | grep -q . && docker rm -f $CONTAINER_NAME || echo "No container to remove"'
+                        
+                        // Deploy Docker container mới từ image
+                        sh 'docker run -d --name $CONTAINER_NAME -p 8080:8080 $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$IMAGE_NAME'
+                    }
+                }
+            }
+        }
+
+    post {
+        always {
+            // Dọn dẹp, xóa container cũ sau khi xong
+            sh 'docker system prune -f'
+        }
+    }
+}
